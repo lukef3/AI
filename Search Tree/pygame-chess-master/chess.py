@@ -1,7 +1,9 @@
+import copy
+
 import pygame
 from pygame.locals import *
 import random
-
+import AI
 from piece import Piece
 from utils import Utils
 
@@ -54,58 +56,83 @@ class Chess(object):
         self.moves = []
 
         # randomize player turn
-        x = random.randint(0, 1)
-        if(x == 1):
-            self.turn["black"] = 1
-        elif(x == 0):
-            self.turn["white"] = 1
+        # x = random.randint(0, 1)
+        # if(x == 1):
+        #     self.turn["black"] = 1
+        # elif(x == 0):
+        #     self.turn["white"] = 1
+
+        # Player start shouldn't be random
+        self.turn["white"] = 1
 
         # two dimensonal dictionary containing details about each board location
         # storage format is [piece_name, currently_selected, x_y_coordinate]
         self.piece_location = {}
-        x = 0
+        x_coord = 0
         for i in range(97, 105):
-            a = 8
-            y = 0
+            rank = 8
+            y_coord = 0
             self.piece_location[chr(i)] = {}
-            while a>0:
+            while rank > 0:
                 # [piece name, currently selected, board coordinates]
-                self.piece_location[chr(i)][a] = ["", False, [x,y]]
-                a = a - 1
-                y = y + 1
-            x = x + 1
+                self.piece_location[chr(i)][rank] = ["", False, [x_coord, y_coord]]
+                rank -= 1
+                y_coord += 1
+            x_coord += 1
 
-        # reset the board
-        for i in range(97, 105):
-            x = 8
-            while x>0:
-                if(x==8):
-                    if(chr(i)=='a' or chr(i)=='h'):
-                        self.piece_location[chr(i)][x][0] = "black_rook"
-                    elif(chr(i)=='b' or chr(i)=='g'):
-                        self.piece_location[chr(i)][x][0] = "black_knight"
-                    elif(chr(i)=='c' or chr(i)=='f'):
-                        self.piece_location[chr(i)][x][0] = "black_bishop"
-                    elif(chr(i)=='d'):
-                        self.piece_location[chr(i)][x][0] = "black_queen"
-                    elif(chr(i)=='e'):
-                        self.piece_location[chr(i)][x][0] = "black_king"
-                elif(x==7):
-                    self.piece_location[chr(i)][x][0] = "black_pawn"
-                elif(x==2):
-                    self.piece_location[chr(i)][x][0] = "white_pawn"
-                elif(x==1):
-                    if(chr(i)=='a' or chr(i)=='h'):
-                        self.piece_location[chr(i)][x][0] = "white_rook"
-                    elif(chr(i)=='b' or chr(i)=='g'):
-                        self.piece_location[chr(i)][x][0] = "white_knight"
-                    elif(chr(i)=='c' or chr(i)=='f'):
-                        self.piece_location[chr(i)][x][0] = "white_bishop"
-                    elif(chr(i)=='d'):
-                        self.piece_location[chr(i)][x][0] = "white_queen"
-                    elif(chr(i)=='e'):
-                        self.piece_location[chr(i)][x][0] = "white_king"
-                x = x - 1
+        # Only place 2 kings and 2 queens
+        # Black queen on d8, black king on e8
+        self.piece_location['d'][8][0] = "black_queen"
+        self.piece_location['e'][8][0] = "black_king"
+
+        # White queen on d1, white king on e1
+        self.piece_location['d'][1][0] = "white_queen"
+        self.piece_location['e'][1][0] = "white_king"
+
+        # self.piece_location = {}
+        # x = 0
+        # for i in range(97, 105):
+        #     a = 8
+        #     y = 0
+        #     self.piece_location[chr(i)] = {}
+        #     while a>0:
+        #         # [piece name, currently selected, board coordinates]
+        #         self.piece_location[chr(i)][a] = ["", False, [x,y]]
+        #         a = a - 1
+        #         y = y + 1
+        #     x = x + 1
+        #
+        # # reset the board
+        # for i in range(97, 105):
+        #     x = 8
+        #     while x>0:
+        #         if(x==8):
+        #             if(chr(i)=='a' or chr(i)=='h'):
+        #                 self.piece_location[chr(i)][x][0] = "black_rook"
+        #             elif(chr(i)=='b' or chr(i)=='g'):
+        #                 self.piece_location[chr(i)][x][0] = "black_knight"
+        #             elif(chr(i)=='c' or chr(i)=='f'):
+        #                 self.piece_location[chr(i)][x][0] = "black_bishop"
+        #             elif(chr(i)=='d'):
+        #                 self.piece_location[chr(i)][x][0] = "black_queen"
+        #             elif(chr(i)=='e'):
+        #                 self.piece_location[chr(i)][x][0] = "black_king"
+        #         elif(x==7):
+        #             self.piece_location[chr(i)][x][0] = "black_pawn"
+        #         elif(x==2):
+        #             self.piece_location[chr(i)][x][0] = "white_pawn"
+        #         elif(x==1):
+        #             if(chr(i)=='a' or chr(i)=='h'):
+        #                 self.piece_location[chr(i)][x][0] = "white_rook"
+        #             elif(chr(i)=='b' or chr(i)=='g'):
+        #                 self.piece_location[chr(i)][x][0] = "white_knight"
+        #             elif(chr(i)=='c' or chr(i)=='f'):
+        #                 self.piece_location[chr(i)][x][0] = "white_bishop"
+        #             elif(chr(i)=='d'):
+        #                 self.piece_location[chr(i)][x][0] = "white_queen"
+        #             elif(chr(i)=='e'):
+        #                 self.piece_location[chr(i)][x][0] = "white_king"
+        #         x = x - 1
 
 
     # 
@@ -127,7 +154,13 @@ class Chess(object):
         
         # let player with black piece play
         if(self.turn["black"]):
-            self.move_piece("black")
+            #self.move_piece("black")
+            search_tree = AI.ChessSearchTreeNode(self, "black")
+            search_tree.min_max_value()
+            best_move = search_tree.children[-1].move
+            source, destination = best_move
+            move_message = self.apply_ai_move(source, destination)
+            print(move_message)
         # let player with white piece play
         elif(self.turn["white"]):
             self.move_piece("white")
@@ -425,8 +458,39 @@ class Chess(object):
 
                 # change selection flag of the selected piece
                 self.piece_location[columnChar][rowNo][1] = True
-                
-            
+
+
+    def apply_ai_move(self, source, destination):
+        """
+        Applies a move to the board without requiring user input.
+        source: a tuple (source_col, source_row) where source_col is a letter (e.g., 'e') and source_row is a number (e.g., 1)
+        destination: a tuple (dest_x, dest_y) where dest_x and dest_y are indices (0-7) corresponding to the board grid.
+        """
+        src_col, src_row = source
+        des_x, des_y = destination
+        # Convert destination indices to board keys.
+        des_col = chr(97 + des_x)
+        des_row = 8 - des_y
+        piece = self.piece_location[src_col][src_row][0]
+        # Remove piece from the source square.
+        self.piece_location[src_col][src_row][0] = ""
+        # Place the piece on the destination square.
+        self.piece_location[des_col][des_row][0] = piece
+
+
+
+        # Update the turn. (You might want to adjust this logic to suit your full game rules.)
+        if self.turn["black"]:
+            self.turn["black"] = 0
+            self.turn["white"] = 1
+        else:
+            self.turn["black"] = 1
+            self.turn["white"] = 0
+
+        return "{} moved from {} to {}".format(piece, source, destination)
+
+
+
     def get_selected_square(self):
         # get left event
         left_click = self.utils.left_click_event()
@@ -679,3 +743,12 @@ class Chess(object):
 
 
         return positions
+
+    def copy_board_state(self):
+        chess_copy = Chess.__new__(Chess)  # Create a new instance without calling __init__
+        chess_copy.turn = self.turn.copy()
+        chess_copy.piece_location = copy.deepcopy(self.piece_location)
+        chess_copy.moves = self.moves[:]
+        chess_copy.winner = self.winner
+        chess_copy.captured = copy.deepcopy(self.captured)
+        return chess_copy
