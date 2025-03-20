@@ -28,7 +28,8 @@ def evaluate_board(chess_state, player):
 
 def all_possible_moves(chess_board, player):
     moves = []
-    board = chess_board.piece_location
+    board = chess_board.piece_location # piece_location contains a value for every square on the board in format: [piece_name, currently_selected, x_y_coordinate]
+    print(board)
     for col in board:
         for row in board[col]:
             piece = board[col][row][0]
