@@ -61,10 +61,7 @@ class ChessSearchTreeNode:
         self.move = None  # stores the move made to this node. source, destination
 
         if self.current_board.winner != "":
-            if (self.ply_depth % 2) == 0:
-                self.value = -1
-            else:
-                self.value = 1
+            self.value = evaluate_board(self.current_board, self.move_for)
             self.value_assigned = True
         elif self.ply_depth >= max_depth:
             self.value = evaluate_board(self.current_board, self.move_for)
