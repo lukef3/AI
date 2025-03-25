@@ -6,25 +6,34 @@ def get_opponent(player):
         return "white"
 
 def evaluate_board(chess_state, player):
+
+    values = {
+        "white_king": 100000,
+        "black_king": 100000,
+        "white_queen": 9,
+        "black_queen": 9,
+    }
+
     board = chess_state.piece_location
-    white_king_present = False
-    black_king_present = False
+    player_score = 0
+    opponent_score = 0
+
+    pieces = []
 
     for col in board:
         for row in board[col]:
             piece = board[col][row][0]
-            if piece == "white_king":
-                white_king_present = True
-            elif piece == "black_king":
-                black_king_present = True
+            if piece != "":
+                pieces.append(piece)
 
-    if not white_king_present or not black_king_present:
-        if player == "white":
-            return 1000000 if white_king_present else -1000000
-        else:
-            return 1000000 if black_king_present else -1000000
-    else:
-        return 0
+    for piece in pieces:
+        if piece.startswith(player):
+            player_score += values[piece]
+        elif piece.startswith(get_opponent(player)):
+            opponent_score += values[piece]
+
+    return player_score - opponent_score
+
 
 def all_possible_moves(chess_board, player):
     moves = []
@@ -43,7 +52,7 @@ def all_possible_moves(chess_board, player):
 
 
 class ChessSearchTreeNode:
-    def __init__(self, chess_board, playing_as, ply=0, max_depth=3):
+    def __init__(self, chess_board, playing_as, ply=0, max_depth=4):
         self.children = []
         self.value_assigned = False
         self.ply_depth = ply
