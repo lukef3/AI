@@ -11,6 +11,12 @@ def evaluate_board(chess_board, player):
         "black_king": 100000,
         "white_queen": 9,
         "black_queen": 9,
+        "white_rook": 5,
+        "black_rook": 5,
+        "white_bishop": 3,
+        "black_bishop": 3,
+        "white_knight": 3,
+        "black_knight": 3,
         "white_pawn": 1,
         "black_pawn": 1
     }
@@ -53,7 +59,7 @@ def all_possible_moves(chess_board, player):
 
 
 class ChessSearchTreeNode:
-    def __init__(self, chess_board, playing_as, ply=0, max_depth=5):
+    def __init__(self, chess_board, playing_as, ply=0, max_depth=4):
         self.children = []
         self.value_assigned = False
         self.ply_depth = ply
