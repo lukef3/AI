@@ -130,7 +130,7 @@ class Game:
         small_font = pygame.font.SysFont("comicsansms", 20)
         # create text to be shown on the game menu
         welcome_text = big_font.render("Chess", False, black_color)
-        created_by = small_font.render("Created by Sheriff", True, black_color)
+        created_by = small_font.render("Created by Sheriff (and Luke)", True, black_color)
         start_btn_label = small_font.render("Play", True, white_color)
         
         # show welcome text
