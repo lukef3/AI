@@ -5,16 +5,17 @@ def get_opponent(player):
     else:
         return "white"
 
-def evaluate_board(chess_state, player):
-
+def evaluate_board(chess_board, player):
     values = {
         "white_king": 100000,
         "black_king": 100000,
         "white_queen": 9,
         "black_queen": 9,
+        "white_pawn": 1,
+        "black_pawn": 1
     }
 
-    board = chess_state.piece_location
+    board = chess_board.piece_location
     player_score = 0
     opponent_score = 0
 
@@ -38,21 +39,21 @@ def evaluate_board(chess_state, player):
 def all_possible_moves(chess_board, player):
     moves = []
     board = chess_board.piece_location # piece_location contains a value for every square on the board in format: [piece_name, currently_selected, x_y_coordinate]
-    print(board)
+    #print(board)
     for col in board:
         for row in board[col]:
             piece = board[col][row][0]
             if piece.startswith(player):
                 piece_coord = board[col][row][2]
-                piece_moves = chess_board.possible_moves(piece, piece_coord)
-                for move in piece_moves:
+                possible_piece_moves = chess_board.possible_moves(piece, piece_coord)
+                for move in possible_piece_moves:
                     source = col, row
                     moves.append((source, move))    # (Source co-ord of piece, destination co-ord of move)
     return moves
 
 
 class ChessSearchTreeNode:
-    def __init__(self, chess_board, playing_as, ply=0, max_depth=4):
+    def __init__(self, chess_board, playing_as, ply=0, max_depth=5):
         self.children = []
         self.value_assigned = False
         self.ply_depth = ply
@@ -71,20 +72,15 @@ class ChessSearchTreeNode:
 
     def generate_children(self, max_depth):
         for move in all_possible_moves(self.current_board, self.move_for):
-            new_state = self.current_board.copy_board_state()
+            new_board = self.current_board.copy_board_state()
             source, destination = move
-            new_state.apply_ai_move(source, destination)
-            next_move = ChessSearchTreeNode(new_state, get_opponent(self.move_for), ply=self.ply_depth + 1, max_depth=max_depth)
+            new_board.apply_ai_move(source, destination)
+            next_move = ChessSearchTreeNode(new_board, get_opponent(self.move_for), ply=self.ply_depth + 1, max_depth=max_depth)
             next_move.move = move  # store the move made to the node
             self.children.append(next_move)
 
     def min_max_value(self):
         if self.value_assigned:
-            return self.value
-
-        if not self.children:
-            self.value = evaluate_board(self.current_board, self.move_for)
-            self.value_assigned = True
             return self.value
 
         self.children.sort(key=lambda child: child.min_max_value())

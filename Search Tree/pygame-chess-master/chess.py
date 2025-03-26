@@ -80,13 +80,13 @@ class Chess(object):
                 y_coord += 1
             x_coord += 1
 
-        # Only place 2 kings and 2 queens
+        # Only place 2 kings and 2 pawns
         # Black queen on d8, black king on e8
-        self.piece_location['d'][8][0] = "black_queen"
+        self.piece_location['d'][8][0] = "black_pawn"
         self.piece_location['e'][8][0] = "black_king"
 
         # White queen on d1, white king on e1
-        self.piece_location['d'][1][0] = "white_queen"
+        self.piece_location['d'][1][0] = "white_pawn"
         self.piece_location['e'][1][0] = "white_king"
 
         # self.piece_location = {}
