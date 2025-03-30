@@ -137,7 +137,6 @@ class Chess(object):
         #         x = x - 1
 
 
-    # 
     def play_turn(self):
         # white color
         white_color = (255, 255, 255)
@@ -150,13 +149,12 @@ class Chess(object):
             turn_text = small_font.render("Turn: White", True, white_color)
         
         # show welcome text
-        self.screen.blit(turn_text, 
-                      ((self.screen.get_width() - turn_text.get_width()) // 2,
-                      10))
+        self.screen.blit(turn_text, ((self.screen.get_width() - turn_text.get_width()) // 2, 10))
         
         # let player with black piece play
         if(self.turn["black"]):
             #self.move_piece("black")
+
             search_tree = AI.ChessSearchTreeNode(self, "black")
             search_tree.min_max_value()
             best_move = search_tree.children[-1].move
@@ -750,7 +748,7 @@ class Chess(object):
         chess_copy = Chess.__new__(Chess)  # Create a new instance without calling __init__
         chess_copy.turn = self.turn.copy()
         chess_copy.piece_location = copy.deepcopy(self.piece_location)
-        chess_copy.moves = self.moves[:]
+        chess_copy.moves = self.moves
         chess_copy.winner = self.winner
         chess_copy.captured = copy.deepcopy(self.captured)
         return chess_copy

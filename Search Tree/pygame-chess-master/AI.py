@@ -68,8 +68,10 @@ class ChessSearchTreeNode:
         self.move = None  # stores the move made to this node. source, destination
 
         if self.current_board.winner != "":
-            self.value = evaluate_board(self.current_board, self.move_for)
-            self.value_assigned = True
+            if (self.ply_depth % 2) == 0:
+                self.value = -float('inf')
+            else:
+                self.value = float('inf')
         elif self.ply_depth >= max_depth:
             self.value = evaluate_board(self.current_board, self.move_for)
             self.value_assigned = True
@@ -85,18 +87,35 @@ class ChessSearchTreeNode:
             next_move.move = move  # store the move made to the node
             self.children.append(next_move)
 
-    def min_max_value(self):
+    def min_max_value(self, alpha=-float('inf'), beta=float('inf')):
         if self.value_assigned:
             return self.value
 
-        self.children.sort(key=lambda child: child.min_max_value())
+        # self.children.sort(key=lambda child: child.min_max_value())
 
+        # https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/
         if (self.ply_depth % 2) == 0:
             # AI's move (max)
-            self.value = self.children[-1].value
+            #self.value = self.children[-1].value
+            bestVal = float('-inf')
+            for child in self.children:
+                value = child.min_max_value(alpha, beta)
+                bestVal = max(bestVal, value)
+                alpha = max(alpha, value)
+                if beta <= alpha:
+                    break  # Beta cut-off
+            self.value = bestVal
         else:
             # player's  move (min)
-            self.value = self.children[0].value
+            #self.value = self.children[0].value
+            bestVal = float('inf')
+            for child in self.children:
+                value = child.min_max_value(alpha, beta)
+                bestVal = min(bestVal, value)
+                beta = min(beta, value)
+                if beta <= alpha:
+                    break  # Alpha cut-off
+            self.value = bestVal
 
         self.value_assigned = True
         return self.value
