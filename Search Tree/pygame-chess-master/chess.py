@@ -84,12 +84,9 @@ class Chess(object):
         # Black queen on d8, black king on e8
         self.piece_location['e'][7][0] = "black_pawn"
         self.piece_location['e'][8][0] = "black_king"
-        self.piece_location['d'][8][0] = "black_knight"
 
         # White queen on d1, white king on e1
-        self.piece_location['e'][2][0] = "white_pawn"
         self.piece_location['e'][1][0] = "white_king"
-        self.piece_location['d'][1][0] = "white_knight"
 
         # self.piece_location = {}
         # x = 0
@@ -157,7 +154,14 @@ class Chess(object):
 
             search_tree = AI.ChessSearchTreeNode(self, "black")
             search_tree.min_max_value()
-            best_move = search_tree.children[-1].move
+
+            # debuggin
+            # for child in search_tree.children:
+            #     print(f"Move: {child.move}, Value: {child.value}")
+            best_node = max(search_tree.children, key=lambda child: child.value)
+            best_move = best_node.move
+            # print(f"Best Move: {best_node.move}, Value: {best_node.value}")
+
             source, destination = best_move
             move_message = self.apply_ai_move(source, destination)
             print(move_message)
@@ -240,17 +244,22 @@ class Chess(object):
 
                 # calculate moves for white pawn
                 if piece_name == "black_pawn":
+                    # Move forward by one if it's empty
                     if y_coord + 1 < 8:
-                        # get row in front of black pawn
-                        rowNo = rowNo - 1
-                        front_piece = self.piece_location[columnChar][rowNo][0]
-                
-                        # pawns cannot move when blocked by another another pawn
-                        if(front_piece[6:] != "pawn"):
-                            positions.append([x_coord, y_coord+1])
-                            # black pawns can move two positions ahead for first move
-                            if y_coord < 2:
-                                positions.append([x_coord, y_coord+2])
+                        front_col = chr(97 + x_coord)  # convert x_coord to file letter
+                        front_row = 8 - (y_coord + 1)  # convert y_coord to rank
+                        front_piece_info = self.piece_location[front_col][front_row]
+
+                        # If the square directly in front is empty
+                        if front_piece_info[0] == "":
+                            positions.append([x_coord, y_coord + 1])
+
+                            # If the pawn is on its starting row, try to move two squares
+                            if y_coord == 1:  # or however you track black's initial rank
+                                two_ahead_row = 8 - (y_coord + 2)
+                                two_ahead_piece_info = self.piece_location[front_col][two_ahead_row]
+                                if two_ahead_piece_info[0] == "":
+                                    positions.append([x_coord, y_coord + 2])
 
                         # EM PASSANT
                         # diagonal to the left
@@ -280,18 +289,24 @@ class Chess(object):
                                 positions.append([x, y])
                         
                 # calculate moves for white pawn
-                elif piece_name == "white_pawn":
+                if piece_name == "white_pawn":
+                    # Move forward by one if it's empty
                     if y_coord - 1 >= 0:
-                        # get row in front of black pawn
-                        rowNo = rowNo + 1
-                        front_piece = self.piece_location[columnChar][rowNo][0]
+                        front_col = chr(97 + x_coord)  # Convert x_coord to file (a-h)
+                        front_row = 8 - (y_coord - 1)  # Convert y_coord to rank (1-8)
+                        front_piece_info = self.piece_location[front_col][front_row]
 
-                        # pawns cannot move when blocked by another another pawn
-                        if(front_piece[6:] != "pawn"):
-                            positions.append([x_coord, y_coord-1])
-                            # black pawns can move two positions ahead for first move
-                            if y_coord > 5:
-                                positions.append([x_coord, y_coord-2])
+                        # If the square directly in front is empty
+                        if front_piece_info[0] == "":
+                            positions.append([x_coord, y_coord - 1])
+
+                            # Allow two-square advance if the pawn is on its starting row
+                            # (Assuming y_coord of 6 is the pawn's initial row for White)
+                            if y_coord == 6:
+                                two_ahead_row = 8 - (y_coord - 2)
+                                two_ahead_piece_info = self.piece_location[front_col][two_ahead_row]
+                                if two_ahead_piece_info[0] == "":
+                                    positions.append([x_coord, y_coord - 2])
 
                         # EM PASSANT
                         # diagonal to the left

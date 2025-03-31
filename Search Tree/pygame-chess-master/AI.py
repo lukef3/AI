@@ -59,7 +59,7 @@ def all_possible_moves(chess_board, player):
 
 
 class ChessSearchTreeNode:
-    def __init__(self, chess_board, playing_as, ply=0, max_depth=4):
+    def __init__(self, chess_board, playing_as, ply=0, max_depth=6):
         self.children = []
         self.value_assigned = False
         self.ply_depth = ply
